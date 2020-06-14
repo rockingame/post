@@ -4,6 +4,7 @@ import glob
 from typing import Any, Union
 from pandas import Series, DataFrame
 import pandas as pd
+from pandas.plotting import table
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
@@ -134,9 +135,24 @@ for file in scenario:
 # Y axis
     plt.gca().invert_yaxis()
 # Legend
-    ax.legend(ncol=2, loc="Top right", frameon=True)
+    ax.legend(ncol=2, loc="upper right", frameon=True)
 # Export figure to csv file
-    graph = plt.savefig(f'temporary_results/{file[:-4]}_figure', dpi=400)
+    plt.savefig(f'temporary_results/{file[:-4]}_figure', dpi=400)
+# Expoert Table
+    # modify the percentage
+    df_mtic['Number of IT Equipment'] = df_mtic['Number of IT Equipment'] * 100
+    df_mtic.columns = [
+        'IT Server Mean Intake Temperature', 'Percentage (%)']
+    decimals = 2
+    df_mtic['Percentage (%)'] = df_mtic['Percentage (%)'].apply(
+        lambda x: round(x, decimals))
+    # Modify the table
+    df_mtic.set_index('IT Server Mean Intake Temperature', inplace=True)
+    ax_table = plt.subplot(511, frame_on=False)  # no visible frame
+    ax_table.xaxis.set_visible(False)  # hide the x axis
+    ax_table.yaxis.set_visible(False)  # hide the y axis
+    table(ax_table, df_mtic)  # where df is your data frame
+    plt.savefig(f'temporary_results/{file[:-4]}_table.png')
 
 # combine processed data
 filenames2 = glob.glob('temporary_results/*.txt')
